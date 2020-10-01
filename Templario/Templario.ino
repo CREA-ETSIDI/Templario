@@ -1,3 +1,4 @@
+/*Code del Templario by CREA*/
 
 #include <ServoTimer2.h>  // the servo library
 #include <VirtualWire.h> //radio
