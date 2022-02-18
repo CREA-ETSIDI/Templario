@@ -5,30 +5,33 @@
 #define gat1 A0 //Motor1
 #define gat2 A1 //Motor2
 
-char senal[]= "sand00SSSS";
+char senal[]= "sand00SSSS";  //señal por defecto. el tamaño de la señal el mismo que ésta, y el código de indetificación es <sand>
 
 void setup() {
-  // put your setup code here, to run once:
+
   
-  Serial.begin(9600);
-  vw_setup(2000);
-  vw_set_tx_pin(9);
+  Serial.begin(9600);  //inicio de la comunicación serie a 9600 baudios
+  vw_setup(2000);  //inicio de la velocidad de trnasmisión del módulo de radio, definido por diseño por el fabricante
+  vw_set_tx_pin(9);   //inicias el pin de transmisión de datos
   
   pinMode(puertoB1,INPUT);
   pinMode(puertoB2,INPUT);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
  
   //digitalWrite(led,digitalRead(int1)); 
-  int pote1=analogRead(gat1);
+  //lectura de los gatillos posteriores
+  int pote1=analogRead(gat1);    
   int pote2=analogRead(gat2);
+  
+//lectura de los botones delanteros
 
   bool boton1=digitalRead(puertoB1);
   bool boton2=digitalRead(puertoB2);
-  
-  if(digitalRead(boton1)){
+
+  // añades a la señal los valores de lectura de los botones 
+  if(digitalRead(boton1)){  
     senal[4]='1';
   }else{
     senal[4]='0';
@@ -38,16 +41,16 @@ void loop() {
   }else{
     senal[5]='0';
   }
-
-  send(senal);
-  
+//envías la señal
+  send(senal); // se enviar un primer ciclo sin la lectura de los motores debido para garantizar un arranque más seguro mendiante un retardo
+  //ajuste de los potes a las señales requeridas para los motores
   senal[6]=(map(pote1,0,1023,0,510)/94)+32;
   senal[7]=(map(pote1,0,1023,0,510)%94)+32;
 
   senal[8]=(map(pote2,0,1023,0,550)/94)+32;
   senal[9]=(map(pote2,0,1023,0,550)%94)+32;
   
- 
+ // imprimir por pantalla los valores de los potes, solo función debuggin
   Serial.print(" gat1: ");
   Serial.print(pote1);
   Serial.print(" gat2: ");
@@ -59,8 +62,9 @@ void loop() {
   delay(1);
 }
 
+
 //Funcion para enviar el mensaje
-void send (char *message)
+void send (char *message)   
 {
   vw_send((uint8_t *)message, strlen(message)); //Envia el mensaje
   vw_wait_tx(); //Espera hasta que se haya acabado de transmitir todo
