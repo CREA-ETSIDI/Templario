@@ -3,12 +3,16 @@
 #include "RF24_config.h"
 #include <SPI.h>
  
-#define SW 7
+#define puertoB1 5  //inversor
+#define puertoB2 6  //Arma
+#define gat1 A0 //Motor1
+#define gat2 A1 //Motor2
 
 typedef struct  {
 int JoyIzq;
-int JoyDer;
-byte Botones ;   // estructura "JoYIzQButton JoyDerButton SW1 SW2  B1 B2 B3 B4"   
+int JoyDer;  
+bool boton1;
+bool boton2;
 }InfoMando;
 
 
@@ -27,9 +31,11 @@ InfoMando Mimando;
  
 void setup(void)
 {
-pinMode(SW,INPUT);
-pinMode(A0,INPUT);
-pinMode(A1,INPUT);
+
+pinMode(gat1,INPUT);
+pinMode(gat2,INPUT);
+pinMode(puertoB1,INPUT);
+pinMode(puertoB2,INPUT);
    radio.begin();
     radio.setDataRate(RF24_250KBPS);
     radio.setAutoAck(0);
@@ -43,8 +49,9 @@ void loop(void)
 {
 Mimando.JoyIzq = analogRead(A0);
 Mimando.JoyDer = analogRead(A1);
-Mimando.Botones =  digitalRead(SW);
-  
+
+Mimando.boton1  =  digitalRead(puertoB1);
+Mimando.boton2  =  digitalRead(puertoB2);
   radio.write(&Mimando, sizeof Mimando);
    //radio.write(&data, sizeof data);
    

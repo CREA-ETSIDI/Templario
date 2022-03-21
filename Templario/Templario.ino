@@ -2,7 +2,40 @@
 
 #include <ServoTimer2.h>  // the servo library
 #include <VirtualWire.h> //radio
+#include "nRF24L01.h"
+#include <RF24.h>
+#include "RF24_config.h"
+#include <SPI.h>
 
+
+//NEW RADIO
+
+typedef struct  {
+int JoyIzq;
+int JoyDer;
+bool boton1 ;   // estructura "JoYIzQButton JoyDerButton SW1 SW2  B1 B2 B3 B4"   
+bool boton2;
+}InfoMando;
+/*
+unsigned long UltimaConexion = 0;
+int packetCounts[10];
+int packetCountIndex = 0;
+int packetCountTotal = 0;
+//char ppsBuf[16];
+
+ unsigned long packetsRead = 0;
+unsigned long lastScreenUpdate = 0;
+unsigned long lastRecvTime = 0;
+unsigned long drops = 0;
+*/
+ 
+const int pinCE = 9;
+const int pinCSN = 10;
+RF24 radio(pinCE, pinCSN);
+ InfoMando Mimando;
+
+
+//OLD RADIO
 uint8_t mess[VW_MAX_MESSAGE_LEN];
 uint8_t messageLength = VW_MAX_MESSAGE_LEN;
 
@@ -26,26 +59,59 @@ void setup() {
   pinMode(pinPHB1,OUTPUT);
   pinMode(pinPHB2,OUTPUT);
 
-  Serial.begin(9600);//Iniciamos el Serial
+
+Serial.begin(115200);
+  //Serial.begin(9600);//Iniciamos el Serial
+  /*
   Serial.println("Iniciando...");
   vw_setup(2000);
   vw_set_rx_pin(3);
   vw_rx_start();
+*/
+
   
 }
 
 void loop() {
+
+  
   /*********lectura mensaje de radio**********/
+  /*
   int boton= mess[5]-48;
   int gat1=(((mess[6]-32)*94)+ mess[7]-32)-40;
   int gat2=(((mess[8]-32)*94)+ mess[9]-32)-40;
   //Velocidades en pwm para los motores
+  */
   int velA;
   int velB;
   //Variables control
   int c1;
   int c2;
   int c3;
+  
+//NEW RADIO
+ if (radio.available())
+   {
+    radio.read(&Mimando, sizeof  Mimando);
+       //radio.read(&data, sizeof data); 
+Serial.print(" lectura Joystick izq: ");
+Serial.println(Mimando.JoyIzq);
+Serial.print(" lectura Joystick der: ");
+Serial.println(Mimando.JoyDer);
+Serial.print(" lectura botones: ");
+Serial.println(Mimando.boton1);
+Serial.println(Mimando.boton2);
+// packetsRead++;
+   c1=motor1(Mimando.JoyIzq,Mimando.boton1);
+      c2=motor2(Mimando.JoyDer,Mimando.boton1);
+      c3=arma(Mimando.boton2);
+
+
+  
+}
+
+/*
+  //OLD RADIO
   vw_get_message(mess, &messageLength);
 
   if (vw_get_message(mess, &messageLength))  
@@ -58,6 +124,7 @@ void loop() {
       Serial.println(c2);
       Serial.println(c3);
     }
+    */
 }
 
 
