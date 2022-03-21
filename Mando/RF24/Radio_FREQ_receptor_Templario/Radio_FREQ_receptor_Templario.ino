@@ -2,12 +2,21 @@
 #include <RF24.h>
 #include "RF24_config.h"
 #include <SPI.h>
+#include <ServoTimer2.h>  // the servo library
+
+#define pinPHA1 5
+#define pinPHA2 6
+#define pinPHB1 8
+#define pinPHB2 9
+
+ServoTimer2 rodillo;
 
 
 typedef struct  {
 int JoyIzq;
-int JoyDer;
-byte Botones ;   // estructura "JoYIzQButton JoyDerButton SW1 SW2  B1 B2 B3 B4"   
+int JoyDer; 
+bool boton1;
+bool boton2;
 }InfoMando;
 
 unsigned long UltimaConexion = 0;
@@ -32,6 +41,11 @@ RF24 radio(pinCE, pinCSN);
 char data[16];
  InfoMando Mimando;
 
+int motor1(int,int);
+int motor2(int,int);
+bool arma(int);
+
+
 
 void updateScreen()
 {  
@@ -54,7 +68,8 @@ Serial.println(Mimando.JoyIzq);
 Serial.print(" lectura Joystick der: ");
 Serial.println(Mimando.JoyDer);
 Serial.print(" lectura botones: ");
-Serial.println(Mimando.Botones);
+Serial.print(Mimando.boton1);
+Serial.println(Mimando.boton2);
 Serial.print(" paquetes: ");
 Serial.println(packetCountTotal);
   //sprintf(ppsBuf, "PPS: %d", packetCountTotal);  //pps = paquetes por segundo
@@ -78,6 +93,18 @@ void setup(void)
  
 void loop(void)
 {
+
+  int velA;
+  int velB;
+  //Variables control
+  int c1;
+  int c2;
+  int c3;
+  
+
+
+
+  
    if (radio.available())
    {
     radio.read(&Mimando, sizeof  Mimando);
@@ -90,13 +117,22 @@ void loop(void)
 //Serial.println(Mimando.Botones);
  packetsRead++;
   UltimaConexion = millis();
+
+
+ c1=motor1(Mimando.JoyIzq,Mimando.boton1);
+      c2=motor2(Mimando.JoyDer,Mimando.boton1);
+      c3=arma(Mimando.boton2);
+
+  
    }
    updateScreen();
+ 
+   
    if(((millis()- UltimaConexion) > 3000) ){
   Mimando.JoyIzq = 0;
   Mimando.JoyDer = 0;
-  Mimando.Botones= 0;
-
+  Mimando.boton1= 0;
+  Mimando.boton2= 0;
 UltimaConexion = millis();
 
 radio.begin();
@@ -106,4 +142,54 @@ radio.begin();
    radio.startListening();
   
 }
+
+
+}
+
+
+int motor1(int a, int c){
+  //motor 1
+  if(a<180 && c==1 ){
+    digitalWrite(pinPHA1,HIGH); 
+    digitalWrite(pinPHA2,LOW);
+  }
+  else if(a<180 && c==0){
+    analogWrite(pinPHA1,LOW); 
+    digitalWrite(pinPHA2,HIGH);
+  }
+  else{
+    analogWrite(pinPHA1,LOW); 
+    digitalWrite(pinPHA2,LOW);
+  }
+
+  return a;
+}
+
+int motor2(int b,int c){
+  //motor 2
+  if(b<180 && c==1){
+    digitalWrite(pinPHB1,HIGH); 
+    digitalWrite(pinPHB2,LOW);
+  }
+  else if(b<180 && c==0){
+  digitalWrite(pinPHB1,LOW); 
+  digitalWrite(pinPHB2,HIGH);
+  }
+  else{
+    analogWrite(pinPHB1,LOW); 
+    digitalWrite(pinPHB2,LOW);
+  }
+  return b;
+}
+bool arma(int c){
+  //1 encendido, 0 apagado
+  rodillo.attach(11);
+  if(c==0){
+    rodillo.write(1200);
+    return 0;
+  }
+  else{
+    rodillo.write(0);
+    return 1;
+  }
 }
