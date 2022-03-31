@@ -117,7 +117,8 @@ void loop(void)
 //Serial.println(Mimando.Botones);
  packetsRead++;
   UltimaConexion = millis();
-
+//Serial.print(Mimando.boton1);
+//Serial.println(Mimando.boton2);
 
  c1=motor1(Mimando.JoyIzq,Mimando.boton1);
       c2=motor2(Mimando.JoyDer,Mimando.boton1);

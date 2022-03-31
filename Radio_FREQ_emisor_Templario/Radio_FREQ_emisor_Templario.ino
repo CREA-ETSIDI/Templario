@@ -31,7 +31,7 @@ InfoMando Mimando;
  
 void setup(void)
 {
-
+Serial.begin(115200);
 pinMode(gat1,INPUT);
 pinMode(gat2,INPUT);
 pinMode(puertoB1,INPUT);
@@ -54,7 +54,8 @@ Mimando.boton1  =  digitalRead(puertoB1);
 Mimando.boton2  =  digitalRead(puertoB2);
   radio.write(&Mimando, sizeof Mimando);
    //radio.write(&data, sizeof data);
-   
+   Serial.print(Mimando.boton1);
+      Serial.println(Mimando.boton2);
 }
 
 /*   joys1, joys2    -> 1 lecturas depotencometros cada 1  -> 2 int 8 bits*2 = 2 bytes 
